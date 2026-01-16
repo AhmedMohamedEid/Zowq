@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Search, Menu, User, X, ChevronDown } from 'lucide-react';
+import { View } from '../types';
 
 interface HeaderProps {
   cartCount: number;
   onOpenCart: () => void;
-  onNavigate: (view: 'home' | 'catalog') => void;
+  onNavigate: (view: View) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ cartCount, onOpenCart, onNavigate }) => {
@@ -18,13 +19,17 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onOpenCart, onNavigate }) =>
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleNav = (v: View) => {
+    onNavigate(v);
+    setIsMenuOpen(false);
+  };
+
   return (
     <header className={`sticky top-0 z-[100] transition-all duration-300 ${
       isScrolled || isMenuOpen ? 'bg-white shadow-md h-20' : 'bg-white/80 backdrop-blur-md h-24'
     }`}>
       <div className="container mx-auto px-4 h-full flex items-center justify-between">
         
-        {/* Mobile Menu Button - Ensure high visibility */}
         <button 
           className="lg:hidden p-3 bg-stone-100 rounded-2xl text-[#4a3728] hover:bg-amber-50 transition-colors"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -33,8 +38,7 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onOpenCart, onNavigate }) =>
           {isMenuOpen ? <X size={26} /> : <Menu size={26} />}
         </button>
 
-        {/* Logo Section */}
-        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => onNavigate('home')}>
+        <div className="flex items-center gap-3 cursor-pointer group" onClick={() => handleNav('home')}>
           <div className="flex flex-col items-center">
             <div className="relative w-14 h-10 flex items-center justify-center transform group-hover:scale-110 transition-transform">
                <svg viewBox="0 0 100 80" className="w-full h-full fill-[#4a3728]">
@@ -46,37 +50,30 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onOpenCart, onNavigate }) =>
           </div>
         </div>
 
-        {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center gap-8 font-bold text-stone-700">
-          <button onClick={() => onNavigate('home')} className="hover:text-amber-700 transition-colors">الرئيسية</button>
+          <button onClick={() => handleNav('home')} className="hover:text-amber-700 transition-colors">الرئيسية</button>
           <div className="relative group">
             <button 
-              onClick={() => onNavigate('catalog')}
+              onClick={() => handleNav('catalog')}
               className="flex items-center gap-1 hover:text-amber-700 transition-colors"
             >
               المنتجات <ChevronDown size={16} />
             </button>
             <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-xl rounded-2xl border border-stone-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all transform translate-y-2 group-hover:translate-y-0 overflow-hidden">
-              <button onClick={() => onNavigate('catalog')} className="w-full text-right px-6 py-3 hover:bg-amber-50 hover:text-amber-700 transition-colors">بقوليات</button>
-              <button onClick={() => onNavigate('catalog')} className="w-full text-right px-6 py-3 hover:bg-amber-50 hover:text-amber-700 transition-colors">تمور فاخرة</button>
-              <button onClick={() => onNavigate('catalog')} className="w-full text-right px-6 py-3 hover:bg-amber-50 hover:text-amber-700 transition-colors">توابل ذوق</button>
+              <button onClick={() => handleNav('catalog')} className="w-full text-right px-6 py-3 hover:bg-amber-50 hover:text-amber-700 transition-colors">بقوليات</button>
+              <button onClick={() => handleNav('catalog')} className="w-full text-right px-6 py-3 hover:bg-amber-50 hover:text-amber-700 transition-colors">تمور فاخرة</button>
+              <button onClick={() => handleNav('catalog')} className="w-full text-right px-6 py-3 hover:bg-amber-50 hover:text-amber-700 transition-colors">توابل ذوق</button>
             </div>
           </div>
-          <a href="#about" className="hover:text-amber-700 transition-colors">حكايتنا</a>
-          <a href="#contact" className="hover:text-amber-700 transition-colors">اتصل بنا</a>
+          <button onClick={() => handleNav('about')} className="hover:text-amber-700 transition-colors">حكايتنا</button>
+          <button onClick={() => handleNav('contact')} className="hover:text-amber-700 transition-colors">اتصل بنا</button>
         </nav>
 
-        {/* Action Buttons */}
         <div className="flex items-center gap-2 lg:gap-4">
-          <div className="hidden sm:flex items-center bg-stone-100 rounded-2xl px-4 py-2 border border-transparent focus-within:border-amber-600 focus-within:bg-white transition-all">
-            <Search size={18} className="text-stone-400" />
-            <input 
-              type="text" 
-              placeholder="ابحث..." 
-              className="bg-transparent border-none outline-none pr-3 w-28 lg:w-40 text-sm font-medium"
-            />
-          </div>
-          <button className="p-3 hover:bg-stone-100 rounded-2xl transition-colors text-stone-700">
+          <button 
+            onClick={() => handleNav('login')}
+            className="p-3 hover:bg-stone-100 rounded-2xl transition-colors text-stone-700"
+          >
             <User size={22} />
           </button>
           <button 
@@ -93,31 +90,15 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onOpenCart, onNavigate }) =>
         </div>
       </div>
 
-      {/* Mobile Menu - Fixed Background and Visibility */}
       <div className={`lg:hidden fixed inset-0 z-[90] bg-white transition-all duration-500 transform ${
         isMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'
       }`}>
         <div className="pt-28 px-6 space-y-8">
           <div className="flex flex-col gap-6">
-            <button onClick={() => { onNavigate('home'); setIsMenuOpen(false); }} className="text-3xl font-black text-stone-800 text-right">الرئيسية</button>
-            <button onClick={() => { onNavigate('catalog'); setIsMenuOpen(false); }} className="text-3xl font-black text-stone-800 text-right">تسوق المنتجات</button>
-            <a href="#about" onClick={() => setIsMenuOpen(false)} className="text-3xl font-black text-stone-800 text-right">حكايتنا</a>
-            <a href="#contact" onClick={() => setIsMenuOpen(false)} className="text-3xl font-black text-stone-800 text-right">اتصل بنا</a>
-          </div>
-          
-          <div className="pt-10 border-t border-stone-100 flex flex-col gap-4">
-            <button className="flex items-center justify-between w-full p-5 bg-stone-50 rounded-[24px] font-bold text-stone-700">
-              حسابي <User size={20} />
-            </button>
-            <div className="flex items-center gap-4 p-5 bg-amber-50 rounded-[24px] border border-amber-100">
-               <div className="w-12 h-12 bg-amber-600 rounded-xl flex items-center justify-center text-white">
-                  <ShoppingCart size={24} />
-               </div>
-               <div>
-                 <p className="font-black text-amber-900">سلة التسوق</p>
-                 <p className="text-sm text-amber-700">{cartCount} منتجات مضافة</p>
-               </div>
-            </div>
+            <button onClick={() => handleNav('home')} className="text-3xl font-black text-stone-800 text-right">الرئيسية</button>
+            <button onClick={() => handleNav('catalog')} className="text-3xl font-black text-stone-800 text-right">تسوق المنتجات</button>
+            <button onClick={() => handleNav('about')} className="text-3xl font-black text-stone-800 text-right">حكايتنا</button>
+            <button onClick={() => handleNav('contact')} className="text-3xl font-black text-stone-800 text-right">اتصل بنا</button>
           </div>
         </div>
       </div>

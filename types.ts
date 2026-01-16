@@ -15,8 +15,14 @@ export interface CartItem extends Product {
 
 export type Category = 'all' | 'legumes' | 'dates' | 'rice' | 'spices';
 
+export type View = 'home' | 'catalog' | 'about' | 'contact' | 'login' | 'register';
+
+export type SuggestionMode = 'recipe' | 'spice_blend' | 'chef_hack';
+
 export interface RecipeSuggestion {
   title: string;
+  type: SuggestionMode;
   ingredients: string[];
   instructions: string[];
+  pro_tip?: string;
 }

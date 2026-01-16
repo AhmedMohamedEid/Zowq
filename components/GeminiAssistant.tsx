@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { Sparkles, Loader2, ChefHat, ChevronLeft, Lightbulb } from 'lucide-react';
-import { getRecipeSuggestion } from '../services/geminiService';
-import { RecipeSuggestion } from '../types';
+import { Sparkles, Loader2, ChefHat, ChevronLeft, Lightbulb, Flame, Wand2, BookOpen } from 'lucide-react';
+import { getSmartSuggestion } from '../services/geminiService';
+import { RecipeSuggestion, SuggestionMode } from '../types';
 
 interface GeminiAssistantProps {
   selectedIngredients: string[];
@@ -10,115 +10,127 @@ interface GeminiAssistantProps {
 
 const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ selectedIngredients }) => {
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<SuggestionMode>('recipe');
   const [recipe, setRecipe] = useState<RecipeSuggestion | null>(null);
 
-  const handleGetSuggestion = async () => {
+  const handleGetSuggestion = async (selectedMode: SuggestionMode) => {
     if (selectedIngredients.length === 0) return;
+    setMode(selectedMode);
     setLoading(true);
-    const result = await getRecipeSuggestion(selectedIngredients);
+    const result = await getSmartSuggestion(selectedIngredients, selectedMode);
     setRecipe(result);
     setLoading(false);
   };
 
+  const modes = [
+    { id: 'recipe', name: 'وصفة فاخرة', icon: <ChefHat size={18} />, color: 'bg-amber-600' },
+    { id: 'spice_blend', name: 'خلطة سرية', icon: <Flame size={18} />, color: 'bg-red-600' },
+    { id: 'chef_hack', name: 'سر المهنة', icon: <Wand2 size={18} />, color: 'bg-indigo-600' },
+  ];
+
   return (
-    <div className="bg-gradient-to-br from-white/10 to-transparent backdrop-blur-md rounded-[40px] p-8 lg:p-12 border border-white/10 shadow-2xl relative overflow-hidden group">
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 blur-[100px] rounded-full group-hover:bg-amber-500/20 transition-all duration-700"></div>
+    <div id="ai-assistant" className="bg-stone-900 rounded-[32px] md:rounded-[48px] p-6 md:p-16 border border-white/5 shadow-3xl relative overflow-hidden group">
+      <div className="absolute top-0 right-0 w-64 h-64 md:w-[500px] md:h-[500px] bg-amber-600/10 blur-[80px] md:blur-[120px] rounded-full"></div>
       
-      <div className="flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
-        <div className="max-w-xl text-center md:text-right space-y-6">
-          <div className="inline-flex items-center gap-3 bg-amber-500/20 px-5 py-2 rounded-full text-amber-400 font-bold text-sm border border-amber-500/30">
-            <Sparkles size={18} />
-            تكنولوجيا الذوق الذكية
+      <div className="flex flex-col lg:flex-row gap-10 md:gap-16 relative z-10">
+        <div className="lg:w-1/2 space-y-6 md:space-y-10">
+          <div className="inline-flex items-center gap-2 bg-amber-500/10 backdrop-blur px-4 py-1.5 md:px-6 md:py-2.5 rounded-full text-amber-500 font-black text-[10px] md:text-sm border border-amber-500/20">
+            <Sparkles size={16} />
+            ذكاء "ذوق" الاصطناعي
           </div>
-          <h2 className="text-4xl lg:text-5xl font-black text-white leading-tight">
-            ماذا سنطبخ بمنتجات <br /> "ذوق" اليوم؟
-          </h2>
-          <p className="text-stone-300 text-lg font-light leading-relaxed">
-            أضف منتجاتك المفضلة إلى السلة، وسيقوم مساعدنا الذكي بابتكار وصفة عربية أصلية أو "تتبيلة سرية" مخصصة لك فقط.
-          </p>
           
-          {!recipe && (
-            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+          <div className="space-y-3 md:space-y-6">
+            <h2 className="text-3xl lg:text-7xl font-black text-white leading-tight">
+              مطبخك <span className="text-amber-500 italic">أكثر ذكاءً</span>
+            </h2>
+            <p className="text-stone-400 text-sm md:text-xl leading-relaxed font-light">
+              حلل مئات الوصفات في ثوانٍ. اختر "الوضع" المفضل لديك.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+            {modes.map((m) => (
               <button
+                key={m.id}
+                onClick={() => handleGetSuggestion(m.id as SuggestionMode)}
                 disabled={loading || selectedIngredients.length === 0}
-                onClick={handleGetSuggestion}
-                className="bg-amber-600 hover:bg-amber-500 disabled:bg-stone-700 disabled:text-stone-500 text-white font-black px-12 py-5 rounded-[20px] transition-all shadow-2xl shadow-amber-900/40 flex items-center justify-center gap-3 active:scale-95 text-lg"
+                className={`flex items-center sm:flex-col sm:justify-center gap-3 sm:gap-0 p-4 sm:p-6 rounded-2xl md:rounded-[32px] border transition-all duration-500 ${
+                  mode === m.id && recipe 
+                    ? `${m.color} text-white border-transparent`
+                    : 'bg-white/5 border-white/10 text-stone-300'
+                } disabled:opacity-50 text-right sm:text-center`}
               >
-                {loading ? <Loader2 className="animate-spin" size={24} /> : <ChefHat size={24} />}
-                {loading ? "جاري ابتكار الوصفة..." : "احصل على اقتراح ذكي"}
-              </button>
-              {selectedIngredients.length === 0 && (
-                <div className="flex items-center gap-2 text-amber-400/80 text-sm font-medium">
-                  <Lightbulb size={18} />
-                  أضف منتجاً واحداً على الأقل للسلة لتبدأ
+                <div className={`p-2 sm:p-3 rounded-xl ${mode === m.id && recipe ? 'bg-white/20' : 'bg-stone-800'} transition-transform sm:mb-3`}>
+                  {m.icon}
                 </div>
-              )}
+                <span className="font-bold text-xs md:text-sm">{m.name}</span>
+              </button>
+            ))}
+          </div>
+
+          {selectedIngredients.length === 0 && (
+            <div className="p-3 bg-amber-900/20 border border-amber-500/20 rounded-xl flex items-center gap-2 text-amber-500 text-[10px] md:text-sm font-bold">
+              <Lightbulb size={16} />
+              أضف منتجات لسلتك لتفعيل الذكاء الاصطناعي
             </div>
           )}
         </div>
 
-        <div className="md:w-1/3 flex justify-center">
-          <div className="relative">
-             <div className="w-64 h-64 bg-amber-600 rounded-full flex items-center justify-center shadow-[0_0_80px_rgba(217,119,6,0.3)] animate-pulse-slow">
-                <ChefHat size={100} className="text-white" />
-             </div>
-             <div className="absolute -top-4 -right-4 bg-white p-4 rounded-3xl shadow-xl text-stone-900 animate-bounce">
-                <Sparkles className="text-amber-600" size={32} />
-             </div>
-          </div>
-        </div>
-      </div>
+        <div className="lg:w-1/2 min-h-[300px] flex items-center justify-center">
+          {loading ? (
+            <div className="text-center space-y-4">
+              <Loader2 className="w-12 h-12 md:w-24 md:h-24 text-amber-500 animate-spin mx-auto opacity-20" />
+              <p className="text-amber-500 font-black text-sm md:text-xl animate-pulse">جاري الابتكار...</p>
+            </div>
+          ) : recipe ? (
+            <div className="w-full bg-white rounded-3xl md:rounded-[40px] p-6 md:p-12 text-stone-900 shadow-2xl">
+              <div className="flex items-start justify-between mb-6 md:mb-10">
+                <div className="space-y-1">
+                  <span className="px-3 py-1 bg-amber-600 rounded-full text-white text-[8px] md:text-[10px] font-black uppercase tracking-widest">
+                    {modes.find(m => m.id === recipe.type)?.name}
+                  </span>
+                  <h3 className="text-xl md:text-4xl font-black text-[#4a3728]">{recipe.title}</h3>
+                </div>
+                <button onClick={() => setRecipe(null)} className="p-2 bg-stone-100 rounded-full text-stone-400">
+                  <ChevronLeft size={20} />
+                </button>
+              </div>
 
-      {recipe && (
-        <div className="mt-16 bg-white rounded-[32px] p-8 lg:p-12 shadow-2xl animate-in zoom-in-95 duration-500 text-stone-900">
-          <div className="flex flex-col md:flex-row items-center justify-between mb-10 gap-6">
-            <div>
-              <span className="text-amber-700 font-bold tracking-widest uppercase text-sm block mb-2">وصفة خاصة لعملاء ذوق</span>
-              <h3 className="text-4xl font-black text-[#4a3728]">{recipe.title}</h3>
-            </div>
-            <button 
-              onClick={() => setRecipe(null)}
-              className="px-6 py-3 bg-stone-100 hover:bg-stone-200 rounded-2xl text-stone-600 font-bold transition-all flex items-center gap-2"
-            >
-              اقتراح آخر <ChevronLeft size={20} />
-            </button>
-          </div>
-          
-          <div className="grid lg:grid-cols-2 gap-16">
-            <div className="space-y-6">
-              <h4 className="text-2xl font-bold flex items-center gap-3 text-amber-700">
-                <span className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center"><Lightbulb size={20} /></span>
-                المكونات المطلوبة
-              </h4>
-              <ul className="space-y-3">
-                {recipe.ingredients.map((ing, idx) => (
-                  <li key={idx} className="flex items-center gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-100 group hover:border-amber-200 transition-colors">
-                    <span className="w-2 h-2 rounded-full bg-amber-500 group-hover:scale-150 transition-transform"></span>
-                    <span className="text-stone-700 font-medium">{ing}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="space-y-6">
-              <h4 className="text-2xl font-bold flex items-center gap-3 text-amber-700">
-                <span className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center"><ChefHat size={20} /></span>
-                طريقة التحضير
-              </h4>
-              <div className="space-y-6 relative border-r-2 border-stone-100 pr-8">
-                {recipe.instructions.map((step, idx) => (
-                  <div key={idx} className="relative">
-                    <span className="absolute -right-[41px] top-0 w-6 h-6 bg-white border-2 border-amber-500 rounded-full flex items-center justify-center text-[10px] font-black text-amber-700 z-10">
-                      {idx + 1}
-                    </span>
-                    <p className="text-stone-600 text-lg leading-relaxed">{step}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-4">
+                  <h4 className="flex items-center gap-2 font-black text-stone-800 border-b border-stone-100 pb-2 text-sm md:text-base">
+                    <BookOpen size={16} /> المتطلبات
+                  </h4>
+                  <ul className="space-y-2">
+                    {recipe.ingredients.map((ing, idx) => (
+                      <li key={idx} className="flex items-center gap-2 text-stone-600 text-xs md:text-sm">
+                        <div className="w-1 h-1 rounded-full bg-amber-500"></div> {ing}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="flex items-center gap-2 font-black text-stone-800 border-b border-stone-100 pb-2 text-sm md:text-base">
+                    <Flame size={16} /> طريقة الإعداد
+                  </h4>
+                  <div className="space-y-3">
+                    {recipe.instructions.map((step, idx) => (
+                      <p key={idx} className="text-stone-500 text-xs md:text-sm leading-relaxed">
+                        <span className="font-black text-amber-700">{idx + 1}.</span> {step}
+                      </p>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="text-center space-y-4 opacity-50">
+               <Wand2 size={48} className="text-amber-500 mx-auto md:w-20 md:h-20" />
+               <p className="text-stone-500 font-bold text-xs md:text-lg">اختر وضعاً لنبدأ السحر...</p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
