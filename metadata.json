@@ -1,0 +1,7 @@
+{
+  "name": "متجر ذوق - Zouq Store",
+  "description": "متجر إلكتروني متخصص في أجود أنواع البقوليات، التمور، الأرز والتوابل الأصلية.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
