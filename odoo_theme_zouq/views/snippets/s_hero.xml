@@ -1,0 +1,20 @@
+
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="s_zouq_hero" name="Zouq Hero Banner">
+        <section class="s_zouq_hero oe_img_bg oe_custom_bg" style="background-image: url('/theme_zouq/static/src/img/hero_bg.jpg');">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h1 className="mb-4">نختار <span>بذوق</span> <br/> لتطهو بفن</h1>
+                        <p class="lead text-white-50 mb-5">أجود أنواع البقوليات والتوابل والتمور مختارة بعناية لتناسب ذوقكم الرفيع.</p>
+                        <div class="d-flex gap-3">
+                            <a href="/shop" class="btn btn-zouq">تسوق الآن</a>
+                            <a href="/aboutus" class="btn btn-outline-light btn-lg rounded-pill px-4">من نحن</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+</odoo>

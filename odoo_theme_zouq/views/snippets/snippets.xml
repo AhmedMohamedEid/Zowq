@@ -1,0 +1,7 @@
+
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <xpath expr="//div[@id='snippet_structure']//div[@class='o_panel_body']" position="inside">
+        <t t-snippet="theme_zouq.s_zouq_hero" t-thumbnail="/theme_zouq/static/src/img/s_hero_thumb.png"/>
+    </xpath>
+</odoo>
